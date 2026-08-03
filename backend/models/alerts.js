@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
-// GeoJSON Point. ATTENTION : coordinates = [longitude, latitude], dans cet ordre.
-const pointSchema = mongoose.Schema(
+const locationSchema = mongoose.Schema(
   {
     type: { type: String, enum: ["Point"], default: "Point" },
     coordinates: { type: [Number], required: true },
@@ -10,19 +9,18 @@ const pointSchema = mongoose.Schema(
 );
 
 const alertSchema = mongoose.Schema({
-  // Requis : seul un utilisateur connecté peut créer une alerte.
+  //  seul un utilisateur connecté peut créer une alerte(only connected user->alert)
   requester: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
     required: true,
   },
-  location: pointSchema,
+  location: locationSchema,
   status: {
     type: String,
     enum: ["pending", "accepted", "onSite", "resolved", "cancelled"],
     default: "pending",
   },
-  // null tant qu'aucun secouriste n'a accepté.
   firstResponder: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "firstResponders",
