@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "expo": "~57.0.9",
-    "expo-status-bar": "~57.0.1",
+    "expo": "^54.0.1",
+    "expo-status-bar": "~3.0.7",
     "react": "19.2.3",
     "react-native": "0.86.2"
   },
