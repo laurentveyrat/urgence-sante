@@ -56,7 +56,6 @@ export default function MapScreen({ navigation }) {
     setSelectedFirstResponder(firstResponder);
     setModalVisible(true);
   };
-
   const markers = firstResponders.map((firstResponder) => {
     return <Marker
       key={firstResponder.id}
