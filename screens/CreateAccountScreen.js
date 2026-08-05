@@ -98,7 +98,7 @@ export default function CreateAccountScreen({ navigation }) {
       const data = await response.json();
 
       if (data.result) {
-        navigation.navigate("Home");
+        navigation.navigate("MainTabs");
       } else {
         setSubmitError(data.error || "Une erreur est survenue");
       }
