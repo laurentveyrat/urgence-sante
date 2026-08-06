@@ -14,6 +14,26 @@ import HistoryScreen from "./screens/HistoryScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import EmergencyScreen from "./screens/EmergencyScreen";
 import FindHospitalsScreen from "./screens/FindHospitalsScreen";
+import ResponderMapScreen from "./screens/ResponderMapScreen";
+
+import { Provider } from 'react-redux';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { persistStore, persistReducer } from 'redux-persist';
+import { PersistGate } from 'redux-persist/integration/react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import user from './reducers/user';
+import ResponderMapScreen from "./screens/ResponderMapScreen";
+
+const reducers = combineReducers({ user });
+const persistConfig = { key: 'urgence-sante', storage: AsyncStorage };
+
+
+const store = configureStore({
+ reducer: persistReducer(persistConfig, reducers),
+ middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
+});
+const persistor = persistStore(store);
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -50,17 +70,23 @@ function MainTabs() {
 // -------------------------- JSX -------------------------
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="CreateAccount"
-        screenOptions={{ headerShown: false }}
-      >
-        <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
-        <Stack.Screen name="MainTabs" component={MainTabs} />
-        <Stack.Screen name="Emergency" component={EmergencyScreen} />
-        <Stack.Screen name="FindHospitals" component={FindHospitalsScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+  <Provider store={store}>
+    <PersistGate persistor={persistor}>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="CreateAccount"
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
+          <Stack.Screen name="MainTabs" component={MainTabs} />
+          <Stack.Screen name="Emergency" component={EmergencyScreen} />
+          <Stack.Screen name="FindHospitals" component={FindHospitalsScreen} />
+          <Stack.Screen name="ResponderMapScreen" component={ResponderMapScreen} />
+
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PersistGate>
+  </Provider>
   );
 }
 
