@@ -22,7 +22,6 @@ import { persistStore, persistReducer } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import user from './reducers/user';
-import ResponderMapScreen from "./screens/ResponderMapScreen";
 
 const reducers = combineReducers({ user });
 const persistConfig = { key: 'urgence-sante', storage: AsyncStorage };
