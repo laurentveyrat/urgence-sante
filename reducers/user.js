@@ -1,12 +1,11 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { TouchableOpacity } from 'react-native';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   value: { firstname: null, email: null, token: null },
 };
 
 export const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     login: (state, action) => {

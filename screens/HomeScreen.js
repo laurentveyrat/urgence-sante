@@ -15,13 +15,11 @@ export default function HomeScreen({ navigation }) {
 
       <View style={styles.buttonGroup}>
         <View style={styles.buttonBlock}>
-          <TouchableOpacity style={styles.emergencyButton}>
-            <Text
-              style={styles.emergencyButtonText}
-              onPress={() => navigation.navigate("Emergency")}
-            >
-              URGENCE ABSOLUE
-            </Text>
+          <TouchableOpacity
+            style={styles.emergencyButton}
+            onPress={() => navigation.navigate("Emergency")}
+          >
+            <Text style={styles.emergencyButtonText}>URGENCE ABSOLUE</Text>
           </TouchableOpacity>
           <Text style={styles.buttonSubtitle}>
             Crise cardiaque, malaise, accident de la route...
@@ -29,13 +27,11 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.buttonBlock}>
-          <TouchableOpacity style={styles.hospitalButton}>
-            <Text
-              style={styles.hospitalButtonText}
-              onPress={() => navigation.navigate("FindHospitals")}
-            >
-              TROUVER UN HÔPITAL
-            </Text>
+          <TouchableOpacity
+            style={styles.hospitalButton}
+            onPress={() => navigation.navigate("FindHospitals")}
+          >
+            <Text style={styles.hospitalButtonText}>TROUVER UN HÔPITAL</Text>
           </TouchableOpacity>
           <Text style={styles.buttonSubtitle}>
             Temps d'attente en temps réel

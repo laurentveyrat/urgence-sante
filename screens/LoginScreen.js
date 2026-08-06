@@ -7,16 +7,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { login } from "../reducers/user";
 
 // --------------------- VALIDATION ------------------
-function validateNumeroSecu(value) {
-  if (!value) return ""; // optionnel
-  if (!/^\d{13}$/.test(value)) {
-    return "Le numéro de sécurité sociale doit contenir 13 chiffres";
-  }
-  return "";
-}
-
 function validateEmail(value) {
   if (!value) return "L'email est requis";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
@@ -27,39 +21,23 @@ function validateEmail(value) {
 
 function validatePassword(value) {
   if (!value) return "Le mot de passe est requis";
-  if (value.length < 8) return "8 caractères minimum";
-  if (!/[A-Z]/.test(value)) return "Au moins une majuscule";
-  if (!/[a-z]/.test(value)) return "Au moins une minuscule";
-  if (!/[^A-Za-z0-9]/.test(value)) return "Au moins un caractère spécial";
   return "";
 }
 
-export default function CreateAccountScreen({ navigation }) {
-  // --------------------- STATES ------------------
-  const [numeroSecu, setNumeroSecu] = useState("");
+// --------------------- STATES ------------------
+export default function LoginScreen({ navigation }) {
+  const dispatch = useDispatch();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [errors, setErrors] = useState({
-    numeroSecu: "",
-    email: "",
-    password: "",
-  });
-  const [touched, setTouched] = useState({
-    numeroSecu: false,
-    email: false,
-    password: false,
-  });
+  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [touched, setTouched] = useState({ email: false, password: false });
 
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --------------------- HANDLERS ------------------
-  const handleChangeNumeroSecu = (value) => {
-    setNumeroSecu(value);
-    setErrors((prev) => ({ ...prev, numeroSecu: validateNumeroSecu(value) }));
-  };
-
   const handleChangeEmail = (value) => {
     setEmail(value);
     setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
@@ -72,35 +50,30 @@ export default function CreateAccountScreen({ navigation }) {
 
   const handleSubmit = async () => {
     const newErrors = {
-      numeroSecu: validateNumeroSecu(numeroSecu),
       email: validateEmail(email),
       password: validatePassword(password),
     };
     setErrors(newErrors);
-    setTouched({ numeroSecu: true, email: true, password: true });
+    setTouched({ email: true, password: true });
 
-    const isValid =
-      !newErrors.numeroSecu && !newErrors.email && !newErrors.password;
+    const isValid = !newErrors.email && !newErrors.password;
     if (!isValid) return;
 
     setSubmitError("");
     setIsSubmitting(true);
     try {
       const response = await fetch(
-        `${process.env.BACKEND_ADRESS}/users/signup`,
+        `${process.env.BACKEND_ADRESS}/users/signin`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            password,
-            socialSecurityNumber: numeroSecu || undefined,
-          }),
+          body: JSON.stringify({ email, password }),
         },
       );
       const data = await response.json();
 
       if (data.result) {
+        dispatch(login({ email: data.email, token: data.token }));
         navigation.navigate("MainTabs");
       } else {
         setSubmitError(data.error || "Une erreur est survenue");
@@ -115,20 +88,7 @@ export default function CreateAccountScreen({ navigation }) {
   // --------------------- JSX ------------------
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Créer un compte</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="N° Sécurité Sociale"
-        value={numeroSecu}
-        onChangeText={handleChangeNumeroSecu}
-        onBlur={() => setTouched((prev) => ({ ...prev, numeroSecu: true }))}
-        keyboardType="numeric"
-        maxLength={13}
-      />
-      {touched.numeroSecu && errors.numeroSecu ? (
-        <Text style={styles.errorText}>{errors.numeroSecu}</Text>
-      ) : null}
+      <Text style={styles.title}>Connexion</Text>
 
       <TextInput
         style={styles.input}
@@ -163,12 +123,12 @@ export default function CreateAccountScreen({ navigation }) {
         disabled={isSubmitting}
       >
         <Text style={styles.buttonText}>
-          {isSubmitting ? "Création..." : "VALIDER"}
+          {isSubmitting ? "Connexion..." : "SE CONNECTER"}
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <Text style={styles.link}>Déjà un compte ? Se connecter</Text>
+      <TouchableOpacity onPress={() => navigation.navigate("CreateAccount")}>
+        <Text style={styles.link}>Pas encore de compte ? Créer un compte</Text>
       </TouchableOpacity>
 
       <StatusBar style="auto" />

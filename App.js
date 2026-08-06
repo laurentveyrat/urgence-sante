@@ -8,6 +8,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 
 import CreateAccountScreen from "./screens/CreateAccountScreen";
+import LoginScreen from "./screens/LoginScreen";
 import HomeScreen from "./screens/HomeScreen";
 import TrainingScreen from "./screens/TrainingScreen";
 import HistoryScreen from "./screens/HistoryScreen";
@@ -79,6 +80,7 @@ export default function App() {
               name="CreateAccount"
               component={CreateAccountScreen}
             />
+            <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen name="Emergency" component={EmergencyScreen} />
             <Stack.Screen
