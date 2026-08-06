@@ -228,9 +228,6 @@ export default function ResponderMapScreen({ navigation }) {
         >
           <FontAwesome5 name="chevron-left" size={18} color="#ffffff" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.headerButton} activeOpacity={0.8}>
-          <FontAwesome5 name="ellipsis-h" size={18} color="#ffffff" />
-        </TouchableOpacity>
       </View>
 
       <Text style={styles.title}>Trouver un Secouriste</Text>

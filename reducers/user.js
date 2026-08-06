@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { TouchableOpacity } from 'react-native';
 
 const initialState = {
   value: { firstname: null, email: null, token: null },
