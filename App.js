@@ -52,7 +52,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="CreateAccount"
+        initialRouteName="MainTabs"
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />

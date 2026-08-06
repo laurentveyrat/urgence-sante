@@ -86,15 +86,18 @@ export default function CreateAccountScreen({ navigation }) {
     setSubmitError("");
     setIsSubmitting(true);
     try {
-      const response = await fetch(`http://192.168.1.48:3000/users/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          socialSecurityNumber: numeroSecu || undefined,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.BACKEND_ADRESS}/users/signup`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            password,
+            socialSecurityNumber: numeroSecu || undefined,
+          }),
+        },
+      );
       const data = await response.json();
 
       if (data.result) {
