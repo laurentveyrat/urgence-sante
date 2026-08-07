@@ -7,13 +7,32 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 // --------------------- VALIDATION ------------------
 function validateNumeroSecu(value) {
   if (!value) return ""; // optionnel
-  if (!/^\d{13}$/.test(value)) {
+
+  const match = /^(\d)(\d{2})(\d{2})(\d{2})(\d{3})(\d{3})$/.exec(value);
+  if (!match) {
     return "Le numéro de sécurité sociale doit contenir 13 chiffres";
   }
+  const [, sexe, , mois, departement] = match;
+
+  if (sexe !== "1" && sexe !== "2") {
+    return "1er chiffre invalide : sexe attendu (1 homme, 2 femme)";
+  }
+
+  const moisNum = Number(mois);
+  if (moisNum < 1 || moisNum > 12) {
+    return "Chiffres 4-5 invalides : mois de naissance attendu (01-12)";
+  }
+
+  const departementNum = Number(departement);
+  if (departementNum < 1 || (departementNum > 95 && departementNum !== 99)) {
+    return "Chiffres 6-7 invalides : département de naissance attendu";
+  }
+
   return "";
 }
 
@@ -39,6 +58,7 @@ export default function CreateAccountScreen({ navigation }) {
   const [numeroSecu, setNumeroSecu] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isFirstResponder, setIsFirstResponder] = useState(false);
 
   const [errors, setErrors] = useState({
     numeroSecu: "",
@@ -87,7 +107,7 @@ export default function CreateAccountScreen({ navigation }) {
     setIsSubmitting(true);
     try {
       const response = await fetch(
-        `${process.env.BACKEND_ADRESS}/users/signup`,
+        `${process.env.EXPO_PUBLIC_BACKEND_ADRESS}/users/signup`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -95,6 +115,7 @@ export default function CreateAccountScreen({ navigation }) {
             email,
             password,
             socialSecurityNumber: numeroSecu || undefined,
+            isFirstResponder,
           }),
         },
       );
@@ -158,6 +179,18 @@ export default function CreateAccountScreen({ navigation }) {
       {submitError ? <Text style={styles.errorText}>{submitError}</Text> : null}
 
       <TouchableOpacity
+        style={styles.checkboxRow}
+        onPress={() => setIsFirstResponder((prev) => !prev)}
+      >
+        <Ionicons
+          name={isFirstResponder ? "checkbox" : "square-outline"}
+          size={22}
+          color="black"
+        />
+        <Text style={styles.checkboxLabel}>Je suis secouriste</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         style={styles.button}
         onPress={handleSubmit}
         disabled={isSubmitting}
@@ -176,6 +209,7 @@ export default function CreateAccountScreen({ navigation }) {
   );
 }
 
+// --------------------- STYLE ------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -224,5 +258,15 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 13,
     textDecorationLine: "underline",
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 16,
+    alignSelf: "flex-start",
+  },
+  checkboxLabel: {
+    fontSize: 15,
   },
 });

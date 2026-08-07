@@ -63,7 +63,7 @@ export default function LoginScreen({ navigation }) {
     setIsSubmitting(true);
     try {
       const response = await fetch(
-        `${process.env.BACKEND_ADRESS}/users/signin`,
+        `${process.env.EXPO_PUBLIC_BACKEND_ADRESS}/users/signin`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
