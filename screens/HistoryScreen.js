@@ -1,6 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function HistoryScreen() {
+
+const BACKEND_URL = 'http://192.168.100.130:3000';
+
+
+export default function HistoryScreen({ navigation }) {
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Historique</Text>
