@@ -18,7 +18,7 @@ export default function EmergencyScreen({ navigation }) {
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('Map')}
+          onPress={() => navigation.navigate('ResponderMapScreen')}
           activeOpacity={0.8}
           >
           <Text style={styles.buttonText}>Secouriste de Proximité</Text>

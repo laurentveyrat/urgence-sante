@@ -129,6 +129,8 @@ export default function ResponderMapScreen({ navigation }) {
       .then((data) => {
         if (data.result) {
           setAlertSent(true);
+        } else {
+          alert(data.error || "L'alerte n'a pas pu être envoyée. Appelez le 15 (SAMU).");
         }
       })
       .catch(() => {
