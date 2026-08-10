@@ -7,9 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
-import { login } from "../reducers/user";
 
 // --------------------- VALIDATION ------------------
 function validateNumeroSecu(value) {
@@ -56,8 +54,6 @@ function validatePassword(value) {
 }
 
 export default function CreateAccountScreen({ navigation }) {
-  const dispatch = useDispatch();
-
   // --------------------- STATES ------------------
   const [numeroSecu, setNumeroSecu] = useState("");
   const [email, setEmail] = useState("");
@@ -126,7 +122,6 @@ export default function CreateAccountScreen({ navigation }) {
       const data = await response.json();
 
       if (data.result) {
-        dispatch(login({ email: data.email, token: data.token, socialSecurityNumber: data.socialSecurityNumber, }));
         navigation.navigate("MainTabs");
       } else {
         setSubmitError(data.error || "Une erreur est survenue");
