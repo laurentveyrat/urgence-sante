@@ -3,9 +3,10 @@ import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, Te
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import * as ImagePicker from 'expo-image-picker';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateSocialSecurityNumber } from '../reducers/user';
 
-const BACKEND_URL = 'http://192.168.100.130:3000';
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_ADRESS;
 
 // --------------------- VALIDATION ------------------
 function validateNss(value) {
@@ -51,6 +52,8 @@ function toIsoDate(value) {
 
 export default function ProfileScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
+  const dispatch = useDispatch();
+
   const [photo, setPhoto] = useState(null);
   const [photoError, setPhotoError] = useState('');
   const [firstname, setFirstname] = useState('');
@@ -168,6 +171,7 @@ export default function ProfileScreen({ navigation }) {
 
       if (data.result) {
         setSaveSuccess(true);
+        dispatch(updateSocialSecurityNumber(nss))
       } else {
         setSaveError(data.error || "Le profil n'a pas pu être enregistré");
       }

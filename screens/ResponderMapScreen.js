@@ -7,7 +7,7 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
 
-const BACKEND_URL = 'http://192.168.100.130:3000';
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_ADRESS;
 
 const FIRST_RESPONDERS = [
   { id: 'mock-1', name: 'Marie D.', certification: 'PSE2', phone: '0639980112', latitude: 48.8869, longitude: 2.3021 },
