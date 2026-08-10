@@ -37,6 +37,18 @@ const persistor = persistStore(store);
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// -------------------------- HOME STACK -------------------------
+const HomeStack = createNativeStackNavigator();
+function HomeStackScreen() {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="Home" component={HomeScreen} />
+      <HomeStack.Screen name="Emergency" component={EmergencyScreen} />
+      <HomeStack.Screen name="FindHospitals" component={FindHospitalsScreen} />
+    </HomeStack.Navigator>
+  );
+}
+
 // -------------------------- TAB NAVIGATOR -------------------------
 
 const TAB_ICONS = {
@@ -58,7 +70,7 @@ function MainTabs() {
         ),
       })}
     >
-      <Tab.Screen name="Accueil" component={HomeScreen} />
+      <Tab.Screen name="Accueil" component={HomeStackScreen} />
       <Tab.Screen name="Formation" component={TrainingScreen} />
       <Tab.Screen name="Historique" component={HistoryScreen} />
       <Tab.Screen name="Profil" component={ProfileScreen} />
@@ -82,11 +94,6 @@ export default function App() {
             />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="MainTabs" component={MainTabs} />
-            <Stack.Screen name="Emergency" component={EmergencyScreen} />
-            <Stack.Screen
-              name="FindHospitals"
-              component={FindHospitalsScreen}
-            />
             <Stack.Screen
               name="ResponderMapScreen"
               component={ResponderMapScreen}
