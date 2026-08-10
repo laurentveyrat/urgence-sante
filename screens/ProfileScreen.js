@@ -73,6 +73,8 @@ export default function ProfileScreen({ navigation }) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
+
 
 
   const clearSaveMessages = () => {
@@ -80,10 +82,14 @@ export default function ProfileScreen({ navigation }) {
     setSaveSuccess(false);
   };
 
+  const handleEdit = () => {
+    clearSaveMessages();
+    setIsEditing(true);
+  };
+
   const handleAddPhoto = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      // Sans message, l'utilisateur appuie et il ne se passe rien.
       setPhotoError('Accès aux photos refusé. Autorisez-le dans les réglages.');
       return;
     }
@@ -130,10 +136,8 @@ export default function ProfileScreen({ navigation }) {
     setNssTouched(true);
     setBirthdateTouched(true);
     setPostalCodeTouched(true);
-    if (nssErrorOnSave || birthdateErrorOnSave || postalCodeErrorOnSave) return;
 
-    // Avant tout nouveau message : sinon un ancien "Profil enregistré" reste
-    // affiché à côté de l'erreur ci-dessous.
+    if (nssErrorOnSave || birthdateErrorOnSave || postalCodeErrorOnSave) return;
     clearSaveMessages();
 
     if (!user.token) {
@@ -143,17 +147,14 @@ export default function ProfileScreen({ navigation }) {
 
     setIsSaving(true);
 
-    // On n'envoie que les champs remplis : un champ laissé vide ne doit pas
-    // écraser la valeur déjà enregistrée côté backend.
+    // sending only filled-in fields
     const body = { token: user.token };
     if (firstname) body.firstname = firstname;
     if (lastname) body.lastname = lastname;
     if (birthdate) body.birthdate = toIsoDate(birthdate);
     if (nss) body.socialSecurityNumber = nss;
 
-    // L'adresse est un sous-document côté backend, pas une chaîne de caractères.
-    // Mongo remplace l'objet entier : les champs qu'on n'envoie pas sont perdus,
-    // d'où les 4 inputs affichés ensemble plutôt qu'un champ libre.
+    //adress is sous-document in mongoDB
     const address = {};
     if (street) address.street = street;
     if (postalCode) address.postalCode = Number(postalCode);
@@ -171,6 +172,7 @@ export default function ProfileScreen({ navigation }) {
 
       if (data.result) {
         setSaveSuccess(true);
+        setIsEditing(false);
         dispatch(updateSocialSecurityNumber(nss))
       } else {
         setSaveError(data.error || "Le profil n'a pas pu être enregistré");
@@ -337,7 +339,9 @@ export default function ProfileScreen({ navigation }) {
           </View>
           {saveError ? <Text style={styles.saveErrorText}>{saveError}</Text> : null}
           {saveSuccess ? <Text style={styles.successText}>Profil enregistré</Text> : null}
-          <TouchableOpacity
+
+          {isEditing ? (
+            <TouchableOpacity
             style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
             onPress={handleSave}
             activeOpacity={0.8}
@@ -347,6 +351,15 @@ export default function ProfileScreen({ navigation }) {
               {isSaving ? 'Enregistrement...' : 'Enregistrer'}
             </Text>
           </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleEdit}
+            activeOpacity={0.8}
+            >
+              <Text style={styles.saveButtonText}>Modifier</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
