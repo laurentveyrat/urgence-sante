@@ -7,7 +7,7 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
 
-const BACKEND_URL = 'http://192.168.100.130:3000';
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_ADRESS;
 
 const FIRST_RESPONDERS = [
   { id: 'mock-1', name: 'Marie D.', certification: 'PSE2', phone: '0639980112', latitude: 48.8869, longitude: 2.3021 },
@@ -129,6 +129,8 @@ export default function ResponderMapScreen({ navigation }) {
       .then((data) => {
         if (data.result) {
           setAlertSent(true);
+        } else {
+          alert(data.error || "L'alerte n'a pas pu être envoyée. Appelez le 15 (SAMU).");
         }
       })
       .catch(() => {
@@ -213,8 +215,12 @@ export default function ResponderMapScreen({ navigation }) {
                 <Text style={styles.textButton}>{alertSent ? 'Alerte envoyée' : 'Envoyer une alerte'}</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={() => handleClose()} style={styles.button} activeOpacity={0.8}>
-              <Text style={styles.textButton}>Close</Text>
+            <TouchableOpacity
+              onPress={() => handleClose()}
+              style={[styles.button, styles.buttonSecondary]}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.textButton, styles.textButtonSecondary]}>Fermer</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -281,7 +287,7 @@ export default function ResponderMapScreen({ navigation }) {
                   onPress={() => handleSelectSuggestion(suggestion)}
                   activeOpacity={0.7}
                 >
-                  <FontAwesome5 name="map-marker-alt" size={14} color="#ec6e5b" />
+                  <FontAwesome5 name="map-marker-alt" size={14} color="#1b1b1b" />
                   <Text style={styles.suggestionText} numberOfLines={1}>
                     {suggestion.properties.label}
                   </Text>
@@ -411,9 +417,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalView: {
+    width: '78%',
     backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 30,
+    borderRadius: 18,
+    padding: 20,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -426,28 +433,37 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: 'bold',
+    color: '#1b1b1b',
   },
   certification: {
     fontSize: 14,
-    color: '#666',
-    marginTop: 4,
+    color: '#6b6b6b',
+    marginTop: 2,
   },
   button: {
-    minWidth: 200,
+    alignSelf: 'stretch',
     alignItems: 'center',
-    marginTop: 20,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    backgroundColor: '#ec6e5b',
-    borderRadius: 10,
+    marginTop: 10,
+    paddingVertical: 13,
+    paddingHorizontal: 16,
+    backgroundColor: '#1b1b1b',
+    borderRadius: 14,
   },
   buttonDisabled: {
-    backgroundColor: '#999999',
+    opacity: 0.5,
+  },
+  buttonSecondary: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#1b1b1b',
   },
   textButton: {
     color: '#ffffff',
-    fontWeight: '600',
+    fontWeight: 'bold',
     fontSize: 16,
+  },
+  textButtonSecondary: {
+    color: '#1b1b1b',
   },
 });
