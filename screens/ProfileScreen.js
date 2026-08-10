@@ -10,19 +10,37 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_ADRESS;
 
 // --------------------- VALIDATION ------------------
 function validateNss(value) {
-  if (!value) return ''; // optionnel
-  if (!/^\d{13}$/.test(value)) {
-    return 'Le numéro de sécurité sociale doit contenir 13 chiffres';
+  if (!value) return ""; // optionnel
+
+  const match = /^(\d)(\d{2})(\d{2})(\d{2})(\d{3})(\d{3})$/.exec(value);
+  if (!match) {
+    return "Le numéro de sécurité sociale doit contenir 13 chiffres";
   }
-  return '';
+  const [, sexe, , mois, departement] = match;
+
+  if (sexe !== "1" && sexe !== "2") {
+    return "1er chiffre invalide : sexe attendu (1 homme, 2 femme)";
+  }
+
+  const moisNum = Number(mois);
+  if (moisNum < 1 || moisNum > 12) {
+    return "Chiffres 4-5 invalides : mois de naissance attendu (01-12)";
+  }
+
+  const departementNum = Number(departement);
+  if (departementNum < 1 || (departementNum > 95 && departementNum !== 99)) {
+    return "Chiffres 6-7 invalides : département de naissance attendu";
+  }
+
+  return "";
 }
+
 
 function validateBirthdate(value) {
   if (!value) return ''; // optionnel
   if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
     return 'Format attendu : JJ/MM/AAAA';
   }
-
   // Le format seul laisse passer 32/13/2020 : on vérifie que la date existe.
   const [day, month, year] = value.split('/').map(Number);
   const date = new Date(year, month - 1, day);
@@ -36,6 +54,7 @@ function validateBirthdate(value) {
 
   return '';
 }
+
 
 function validatePostalCode(value) {
   if (!value) return ''; // optionnel
@@ -63,16 +82,22 @@ export default function ProfileScreen({ navigation }) {
   const [postalCode, setPostalCode] = useState('');
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
-  const [postalCodeError, setPostalCodeError] = useState('');
-  const [postalCodeTouched, setPostalCodeTouched] = useState(false);
   const [nss, setNss] = useState('');
-  const [nssError, setNssError] = useState('');
-  const [nssTouched, setNssTouched] = useState(false);
+
+
   const [birthdateError, setBirthdateError] = useState('');
   const [birthdateTouched, setBirthdateTouched] = useState(false);
+
+  const [postalCodeError, setPostalCodeError] = useState('');
+  const [postalCodeTouched, setPostalCodeTouched] = useState(false);
+
+  const [nssError, setNssError] = useState('');
+  const [nssTouched, setNssTouched] = useState(false);
+
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+
   const [isEditing, setIsEditing] = useState(true);
 
 
