@@ -230,46 +230,7 @@ export default function ResponderMapScreen({ navigation }) {
   /* -------- handlers if I were first responder -------- */
 
   const handleToggleAvailability = async () => {
-    if (!user.token) return;
-
-    try {
-      if (!myResponder) {
-        const signupResponse = await fetch(`${BACKEND_URL}/firstResponders/signup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token: user.token,
-            certifications: [{ certName: 'PSC1', organisation: 'Croix-Rouge' }],
-            isPubliclyListed: true,
-          }),
-        });
-        const signupData = await signupResponse.json();
-
-        if (!signupData.result) {
-          alert(signupData.error);
-          return;
-        }
-      }
-
-      const nextAvailability = !myResponder?.isAvailable;
-
-      const response = await fetch(`${BACKEND_URL}/firstResponders/availability`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: user.token, isAvailable: nextAvailability }),
-      });
-      const data = await response.json();
-
-      if (data.result) {
-        setMyResponder((previous) => ({
-          ...previous,
-          isAvailable: nextAvailability,
-          isPubliclyListed: true,
-        }));
-      }
-    } catch (error) {
-      console.error(error);
-    }
+ //not finished
   };
 
   const handleAcceptAlert = (alertToAccept) => {
@@ -309,18 +270,7 @@ export default function ResponderMapScreen({ navigation }) {
       });
   };
 // waiting for FindHospitalScreen to adapt the same code
-  const handleNavigateToAlert = (alertToReach) => {
-    const { latitude, longitude } = alertToReach;
 
-    const url = Platform.select({
-      ios: `maps://app?daddr=${latitude},${longitude}`,
-      android: `google.navigation:q=${latitude},${longitude}`,
-    });
-
-    Linking.openURL(url).catch(() => {
-      Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`);
-    });
-  };
 
   /* ========================== DERIVED VALUES ============================ */
 
