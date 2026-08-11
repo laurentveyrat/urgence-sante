@@ -9,23 +9,12 @@ import * as Location from 'expo-location';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_ADRESS;
 
-const FIRST_RESPONDERS = [
-  { id: 'mock-1', name: 'Marie D.', certification: 'PSE2', phone: '0639980112', latitude: 48.8869, longitude: 2.3021 },
-  { id: 'mock-2', name: 'Karim B.', certification: 'PSE1', phone: '0639980237', latitude: 48.8842, longitude: 2.2986 },
-  { id: 'mock-3', name: 'Sophie N.', certification: 'PSE2', phone: '0639980345', latitude: 48.8901, longitude: 2.3105 },
-  { id: 'mock-4', name: 'Thomas L.', certification: 'PSC1', phone: '0639980458', latitude: 48.8825, longitude: 2.3078 },
-  { id: 'mock-5', name: 'Amina K.', certification: 'PSE1', phone: '0639980561', latitude: 48.8917, longitude: 2.2954 },
-  { id: 'mock-6', name: 'Lucas M.', certification: 'PSE2', phone: '0639980674', latitude: 48.8794, longitude: 2.3012 },
-  { id: 'mock-7', name: 'Chloé R.', certification: 'PSC1', phone: '0639980783', latitude: 48.8883, longitude: 2.3142 },
-  { id: 'mock-8', name: 'Yanis T.', certification: 'PSE1', phone: '0639980896', latitude: 48.8938, longitude: 2.3049 },
-];
-
 export default function ResponderMapScreen({ navigation }) {
   /* ------------------------- Redux, state, refs ------------------------- */
 
   const user = useSelector((state) => state.user.value);
 
-  const [firstResponders, setFirstResponders] = useState(FIRST_RESPONDERS);
+  const [firstResponders, setFirstResponders] = useState([]);
   const [currentPosition, setCurrentPosition] = useState(null);
   const [selectedFirstResponder, setSelectedFirstResponder] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -43,8 +32,8 @@ export default function ResponderMapScreen({ navigation }) {
     fetch(`${BACKEND_URL}/firstResponders`)
       .then((response) => response.json())
       .then((data) => {
-        if (data.result && data.firstResponders?.length > 0) {
-          setFirstResponders(data.firstResponders);
+        if (data.result) {
+          setFirstResponders(data.firstResponders ?? []);
         }
       })
       .catch((error) => {
