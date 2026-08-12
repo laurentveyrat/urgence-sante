@@ -69,6 +69,11 @@ function toIsoDate(value) {
   return `${year}-${month}-${day}`;
 }
 
+function toDisplayDate(value) {
+  const [year, month, day] = value.slice(0, 10).split('-');
+  return `${day}/${month}/${year}`;
+}
+
 export default function ProfileScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
   const dispatch = useDispatch();
@@ -99,6 +104,31 @@ export default function ProfileScreen({ navigation }) {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const [isEditing, setIsEditing] = useState(true);
+
+useEffect(() => {
+  if (!user.token) return;
+
+  fetch(`${BACKEND_URL}/users/profile/${user.token}`)
+  .then((response) => response.json())
+  .then((data) => {
+    if (!data.result) return;
+
+    const profile = data.profile;
+
+    setFirstname(profile.firstname || '');
+    setLastname(profile.lastname || '');
+    setBirthdate(profile.birthdate ? toDisplayDate(profile.birthdate) : '');
+    setStreet(profile.address?.street || '');
+    setPostalCode(profile.address?.postalCode ? String(profile.address.postalCode) : '');
+    setCity(profile.address?.city || '');
+    setCountry(profile.address?.country || '');
+    setNss(profile.socialSecurityNumber || '');
+    setIsEditing(!profile.firstname)
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+}, [user.token]);
 
 
 
@@ -151,7 +181,7 @@ export default function ProfileScreen({ navigation }) {
     clearSaveMessages();
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     const nssErrorOnSave = validateNss(nss);
     const birthdateErrorOnSave = validateBirthdate(birthdate);
     const postalCodeErrorOnSave = validatePostalCode(postalCode);
@@ -187,26 +217,27 @@ export default function ProfileScreen({ navigation }) {
     if (country) address.country = country;
     if (Object.keys(address).length > 0) body.address = address;
 
-    try {
-      const response = await fetch(`${BACKEND_URL}/users/profile`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+    fetch(`${BACKEND_URL}/users/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          setSaveSuccess(true);
+          setIsEditing(false);
+          dispatch(updateSocialSecurityNumber(nss));
+        } else {
+          setSaveError(data.error || "Le profil n'a pas pu être enregistré");
+        }
+      })
+      .catch(() => {
+        setSaveError('Impossible de contacter le serveur');
+      })
+      .finally(() => {
+        setIsSaving(false);
       });
-      const data = await response.json();
-
-      if (data.result) {
-        setSaveSuccess(true);
-        setIsEditing(false);
-        dispatch(updateSocialSecurityNumber(nss))
-      } else {
-        setSaveError(data.error || "Le profil n'a pas pu être enregistré");
-      }
-    } catch (err) {
-      setSaveError('Impossible de contacter le serveur');
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   return (
