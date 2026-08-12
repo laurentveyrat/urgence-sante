@@ -123,6 +123,7 @@ useEffect(() => {
     setCity(profile.address?.city || '');
     setCountry(profile.address?.country || '');
     setNss(profile.socialSecurityNumber || '');
+    setPhoto(profile.photo || null);
     setIsEditing(!profile.firstname)
   })
   .catch((error) => {
@@ -157,10 +158,41 @@ useEffect(() => {
       quality: 0.7,
     });
 
-    if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
-      clearSaveMessages();
+    if (result.canceled) return;
+
+    const uri = result.assets[0].uri;
+
+    setPhoto(uri);
+    clearSaveMessages();
+
+    if (!user.token) {
+      setPhotoError('Connectez-vous pour enregistrer votre photo.');
+      return;
     }
+
+    const formData = new FormData();
+    formData.append('photoFromFront', {
+      uri,
+      name: 'photo.jpg',
+      type: 'image/jpeg',
+    });
+    formData.append('token', user.token);
+
+    fetch(`${BACKEND_URL}/users/profile/upload`, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          setPhoto(data.url);
+        } else {
+          setPhotoError(data.error || "La photo n'a pas pu être enregistrée");
+        }
+      })
+      .catch(() => {
+        setPhotoError('Impossible de contacter le serveur');
+      });
   };
 
   const handleChangeNss = (value) => {
