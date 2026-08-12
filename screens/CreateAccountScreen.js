@@ -125,10 +125,11 @@ export default function CreateAccountScreen({ navigation }) {
       const data = await response.json();
 
       if (data.result) {
-        dispatch(login({ 
+        dispatch(login({
           email: data.email,
           token: data.token,
-          socialSecurityNumber: data.socialSecurityNumber, }));
+          socialSecurityNumber: data.socialSecurityNumber,
+          isFirstResponder: data.isFirstResponder, }));
         navigation.navigate("MainTabs");
       } else {
         setSubmitError(data.error || "Une erreur est survenue");
