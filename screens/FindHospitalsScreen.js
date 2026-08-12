@@ -91,7 +91,10 @@ export default function FindHospitalsScreen({ navigation }) {
       <TouchableOpacity
         style={styles.mainButton}
         onPress={() => {
-          /* navigation.navigate(...) */
+          navigation.navigate("HospitalsMapScreen", {
+            profile: selectedProfile,
+            symptoms,
+          });
         }}
       >
         <Text style={styles.mainButtonText}>TROUVER LES HÔPITAUX</Text>
