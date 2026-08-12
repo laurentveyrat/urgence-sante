@@ -68,21 +68,21 @@ export default function ResponderMapScreen({ navigation }) {
 
       if (status === "granted") {
         Location.watchPositionAsync({ distanceInterval: 10 }, (location) => {
-            setCurrentPosition(location.coords);
+          setCurrentPosition(location.coords);
 
-            if (!user.token) return;
+          if (!user.token) return;
 
-            /*if I am first responder I need to send my location for other users */
-            fetch(`${BACKEND_URL}/firstResponders/location`, {
+          /*if I am first responder I need to send my location for other users */
+          fetch(`${BACKEND_URL}/firstResponders/location`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                token: user.token,
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
-              }),
-            }).catch((error) => console.error(error));
-          });
+            body: JSON.stringify({
+              token: user.token,
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            }),
+          }).catch((error) => console.error(error));
+        });
       } else {
         console.warn("Location permission denied");
       }
@@ -136,7 +136,7 @@ export default function ResponderMapScreen({ navigation }) {
 
   useEffect(() => {
     if (mode !== "mission" || !isFocused || !myResponder || !user.token) return;
-    
+
     const fetchPendingAlerts = () => {
       fetch(`${BACKEND_URL}/alerts/pending/${user.token}`)
         .then((response) => response.json())
@@ -299,13 +299,13 @@ const handleToggleAvailability = () => {
   const markers = firstResponders.map((firstResponder) => {
     return (
       <Marker
-      key={firstResponder.id}
+        key={firstResponder.id}
         coordinate={{
           latitude: firstResponder.latitude,
           longitude: firstResponder.longitude,
         }}
-      title={firstResponder.name}
-      onPress={() => handlePress(firstResponder)}
+        title={firstResponder.name}
+        onPress={() => handlePress(firstResponder)}
       />
     );
   });
@@ -313,14 +313,14 @@ const handleToggleAvailability = () => {
   const alertMarkers = pendingAlerts.map((pendingAlert) => {
     return (
       <Marker
-      key={pendingAlert.id}
+        key={pendingAlert.id}
         coordinate={{
           latitude: pendingAlert.latitude,
           longitude: pendingAlert.longitude,
         }}
         title={pendingAlert.requesterName || "Alerte"}
-      pinColor="red"
-      onPress={() => setSelectedAlert(pendingAlert)}
+        pinColor="red"
+        onPress={() => setSelectedAlert(pendingAlert)}
       />
     );
   });
@@ -344,21 +344,21 @@ const handleToggleAvailability = () => {
           <View style={styles.modalView}>
             {selectedFirstResponder && (
               <>
-              <Text style={styles.name}>{selectedFirstResponder.name}</Text>
+                <Text style={styles.name}>{selectedFirstResponder.name}</Text>
                 <Text style={styles.certification}>
                   {selectedFirstResponder.certification}
                 </Text>
-              <TouchableOpacity
+                <TouchableOpacity
                   onPress={() =>
                     Linking.openURL(`tel:${selectedFirstResponder.phone}`)
                   }
-                style={styles.button}
-                activeOpacity={0.8}
+                  style={styles.button}
+                  activeOpacity={0.8}
                 >
                   <Text style={styles.textButton}>
                     Appeler {selectedFirstResponder.phone}
                   </Text>
-              </TouchableOpacity>
+                </TouchableOpacity>
               </>
             )}
             {user.token && (
