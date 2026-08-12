@@ -13,12 +13,45 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useSelector } from "react-redux";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import { useIsFocused } from "@react-navigation/native";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_ADRESS;
 const POLL_INTERVAL = 10000;
+
+const decodePolyline = (encoded) => {
+  const points = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < encoded.length) {
+    let shift = 0;
+    let result = 0;
+    let byte;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    lat += result & 1 ? ~(result >> 1) : result >> 1;
+
+    shift = 0;
+    result = 0;
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    lng += result & 1 ? ~(result >> 1) : result >> 1;
+
+    points.push({ latitude: lat / 1e5, longitude: lng / 1e5 });
+  }
+
+  return points;
+};
 
 export default function ResponderMapScreen({ navigation }) {
   /* ------------------------- Redux, state, refs ------------------------- */
@@ -40,6 +73,7 @@ export default function ResponderMapScreen({ navigation }) {
   const [pendingAlerts, setPendingAlerts] = useState([]);
   const [activeAlert, setActiveAlert] = useState(null);
   const [selectedAlert, setSelectedAlert] = useState(null);
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
 
   const mapRef = useRef(null);
 
@@ -153,6 +187,30 @@ export default function ResponderMapScreen({ navigation }) {
 
     return () => clearInterval(interval);
   }, [mode, isFocused, myResponder, user.token]);
+
+  /* ------------- Trajet du secouriste vers l'alerte acceptée ------------- */
+
+  useEffect(() => {
+    if (!currentPosition || !activeAlert) {
+      setRouteCoordinates([]);
+      return;
+    }
+
+    const origin = `${currentPosition.latitude},${currentPosition.longitude}`;
+    const destination = `${activeAlert.latitude},${activeAlert.longitude}`;
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=driving&key=${process.env.EXPO_PUBLIC_GOOGLE_DIRECTIONS_API_KEY}`;
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        const points = data.routes?.[0]?.overview_polyline?.points;
+        setRouteCoordinates(points ? decodePolyline(points) : []);
+      })
+      .catch((error) => {
+        console.error(error);
+        setRouteCoordinates([]);
+      });
+  }, [currentPosition, activeAlert]);
 
   /* ============================== HANDLERS =============================== */
 
@@ -292,7 +350,6 @@ const handleToggleAvailability = () => {
         console.error(error);
       });
   };
-// waiting for FindHospitalScreen to adapt the same code
 
   /* ========================== DERIVED VALUES ============================ */
 
@@ -419,6 +476,13 @@ const handleToggleAvailability = () => {
           }}
         >
           {mode === "mission" ? alertMarkers : markers}
+          {routeCoordinates.length > 0 && (
+            <Polyline
+              coordinates={routeCoordinates}
+              strokeColor="#7A0C25"
+              strokeWidth={4}
+            />
+          )}
         </MapView>
         <TouchableOpacity
           style={[
