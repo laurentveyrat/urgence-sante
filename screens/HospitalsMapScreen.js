@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 
 // -------------------------- MOCK DATA -------------------------
@@ -58,7 +58,7 @@ const MOCK_HOSPITALS = [
   },
 ];
 
-// -------------------------- VARIABLES / CONSTANTES -------------------------
+// -------------------------- VARIABLES / CONSTANTES / UTILITAIRES -------------------------
 const randomWaitMinutes = () => Math.floor(Math.random() * (120 - 15 + 1)) + 15;
 
 const PARIS_CENTER = { latitude: 48.8566, longitude: 2.3522 };
@@ -98,6 +98,78 @@ const formatWaitTime = (minutes) => {
   return `${hours}h${String(remainingMinutes).padStart(2, "0")} min`;
 };
 
+const normalize = (str) =>
+  str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+// Clés déjà normalisées (minuscules, sans accents) pour matcher normalize(profile) / normalize(symptom)
+const PROFILE_SPECIALTIES = {
+  bebe: ["pediatrie"],
+  enfant: ["pediatrie"],
+  adulte: ["urgences generales"],
+  "personne agee": ["urgences generales"],
+  "mal. chronique": ["urgences generales", "hematologie"],
+};
+
+const SYMPTOM_SPECIALTIES = {
+  toux: ["pediatrie", "urgences generales"],
+  fievre: ["pediatrie", "urgences generales"],
+  vertige: ["urgences generales"],
+  nausees: ["gastro-enterologie"],
+  diarrhee: ["gastro-enterologie"],
+  "douleurs abdominales": ["gastro-enterologie"],
+};
+
+const getMatchScore = (hospitalSpecialties, relevantSpecialties) => {
+  const normalizedSpecialties = hospitalSpecialties.map(normalize);
+  let score = 0;
+
+  relevantSpecialties.forEach((keyword) => {
+    if (
+      normalizedSpecialties.some((specialty) => specialty.includes(keyword))
+    ) {
+      score += 1;
+    }
+  });
+
+  return score;
+};
+
+const decodePolyline = (encoded) => {
+  const points = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < encoded.length) {
+    let shift = 0;
+    let result = 0;
+    let byte;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    lat += result & 1 ? ~(result >> 1) : result >> 1;
+
+    shift = 0;
+    result = 0;
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    lng += result & 1 ? ~(result >> 1) : result >> 1;
+
+    points.push({ latitude: lat / 1e5, longitude: lng / 1e5 });
+  }
+
+  return points;
+};
+
 // -------------------------- COMPONENT -------------------------
 export default function HospitalsMapScreen({ navigation, route }) {
   const { profile = "Bébé", symptoms = ["Toux", "Douleurs abdominales"] } =
@@ -119,20 +191,39 @@ export default function HospitalsMapScreen({ navigation, route }) {
     latitudeDelta: 0.08,
     longitudeDelta: 0.08,
   });
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [listLayoutHeight, setListLayoutHeight] = useState(0);
+  const [listContentHeight, setListContentHeight] = useState(0);
+  const [listScrollY, setListScrollY] = useState(0);
+
+  const relevantSpecialties = useMemo(() => {
+    const fromProfile = PROFILE_SPECIALTIES[normalize(profile)] ?? [];
+    const fromSymptoms = symptoms.flatMap(
+      (symptom) => SYMPTOM_SPECIALTIES[normalize(symptom)] ?? [],
+    );
+    return new Set([...fromProfile, ...fromSymptoms]);
+  }, [profile, symptoms]);
+
   const hospitalsWithDistance = useMemo(() => {
     const origin = currentPosition ?? PARIS_CENTER;
 
     return hospitals
       .map((hospital) => {
         const distanceKm = getDistanceKm(origin, hospital);
+        const durationMin = getDurationMin(distanceKm);
         return {
           ...hospital,
           distanceKm,
-          durationMin: getDurationMin(distanceKm),
+          durationMin,
+          totalMinutes: hospital.waitMinutes + durationMin,
+          matchScore: getMatchScore(hospital.specialties, relevantSpecialties),
         };
       })
-      .sort((a, b) => a.distanceKm - b.distanceKm);
-  }, [hospitals, currentPosition]);
+      .sort((a, b) => {
+        if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+        return a.totalMinutes - b.totalMinutes;
+      });
+  }, [hospitals, currentPosition, relevantSpecialties]);
 
   // -------------------------- FUNCTIONS -------------------------
   const handleZoom = (factor) => {
@@ -186,6 +277,44 @@ export default function HospitalsMapScreen({ navigation, route }) {
     });
   }, []);
 
+  /* ------------------------ search for the best route ----------------------- */
+  useEffect(() => {
+    if (!currentPosition || !selectedId) return;
+
+    const hospital = hospitals.find((h) => h.id === selectedId);
+    if (!hospital) return;
+
+    const origin = `${currentPosition.latitude},${currentPosition.longitude}`;
+    const destination = `${hospital.latitude},${hospital.longitude}`;
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=driving&key=${process.env.EXPO_PUBLIC_GOOGLE_DIRECTIONS_API_KEY}`;
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        const points = data.routes?.[0]?.overview_polyline?.points;
+        setRouteCoordinates(points ? decodePolyline(points) : []);
+      })
+      .catch((error) => {
+        console.error(error);
+        setRouteCoordinates([]);
+      });
+  }, [currentPosition, selectedId, hospitals]);
+
+  // -------------------------- DERIVED VALUES -------------------------
+  const canScrollList = listContentHeight > listLayoutHeight;
+  const listThumbHeight = canScrollList
+    ? Math.max((listLayoutHeight / listContentHeight) * listLayoutHeight, 30)
+    : 0;
+  const listScrollRange = listContentHeight - listLayoutHeight;
+  const listThumbTravel = listLayoutHeight - listThumbHeight;
+  const listThumbOffset =
+    canScrollList && listScrollRange > 0
+      ? Math.min(
+          Math.max((listScrollY / listScrollRange) * listThumbTravel, 0),
+          listThumbTravel,
+        )
+      : 0;
+
   // -------------------------- JSX -------------------------
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -229,6 +358,13 @@ export default function HospitalsMapScreen({ navigation, route }) {
               onPress={() => handleSelectHospital(hospital)}
             />
           ))}
+          {routeCoordinates.length > 0 && (
+            <Polyline
+              coordinates={routeCoordinates}
+              strokeColor="#7A0C25"
+              strokeWidth={4}
+            />
+          )}
         </MapView>
 
         {/* Boutons zoom */}
@@ -253,7 +389,16 @@ export default function HospitalsMapScreen({ navigation, route }) {
 
       {/* Liste des hôpitaux */}
       <View style={styles.listPanel}>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+          onLayout={(event) =>
+            setListLayoutHeight(event.nativeEvent.layout.height)
+          }
+          onContentSizeChange={(width, height) => setListContentHeight(height)}
+          onScroll={(event) => setListScrollY(event.nativeEvent.contentOffset.y)}
+          scrollEventThrottle={16}
+        >
           {hospitalsWithDistance.map((hospital) => {
             const isSelected = hospital.id === selectedId;
 
@@ -316,6 +461,17 @@ export default function HospitalsMapScreen({ navigation, route }) {
             );
           })}
         </ScrollView>
+
+        {canScrollList && (
+          <View style={styles.scrollTrack} pointerEvents="none">
+            <View
+              style={[
+                styles.scrollThumb,
+                { height: listThumbHeight, top: listThumbOffset },
+              ]}
+            />
+          </View>
+        )}
       </View>
 
       {/* Boutton "Lancer la navigation" */}
@@ -396,8 +552,28 @@ const styles = StyleSheet.create({
   listPanel: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: 20,
+    paddingLeft: 20,
     paddingTop: 16,
+    position: "relative",
+  },
+  listContent: {
+    paddingRight: 28,
+    paddingBottom: 4,
+  },
+  scrollTrack: {
+    position: "absolute",
+    top: 16,
+    right: 8,
+    bottom: 0,
+    width: 4,
+    borderRadius: 2,
+    backgroundColor: "#eee",
+  },
+  scrollThumb: {
+    position: "absolute",
+    width: 4,
+    borderRadius: 2,
+    backgroundColor: "#b0b0b0",
   },
   card: {
     borderWidth: 1,
