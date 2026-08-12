@@ -16,6 +16,7 @@ import ProfileScreen from "./screens/ProfileScreen";
 import EmergencyScreen from "./screens/EmergencyScreen";
 import FindHospitalsScreen from "./screens/FindHospitalsScreen";
 import ResponderMapScreen from "./screens/ResponderMapScreen";
+import HospitalsMapScreen from "./screens/HospitalsMapScreen";
 
 import { Provider } from "react-redux";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
@@ -45,6 +46,10 @@ function HomeStackScreen() {
       <HomeStack.Screen name="Home" component={HomeScreen} />
       <HomeStack.Screen name="Emergency" component={EmergencyScreen} />
       <HomeStack.Screen name="FindHospitals" component={FindHospitalsScreen} />
+      <HomeStack.Screen
+        name="HospitalsMapScreen"
+        component={HospitalsMapScreen}
+      />
     </HomeStack.Navigator>
   );
 }
