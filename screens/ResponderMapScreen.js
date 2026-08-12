@@ -229,9 +229,25 @@ export default function ResponderMapScreen({ navigation }) {
 
   /* -------- handlers if I were first responder -------- */
 
-  const handleToggleAvailability = async () => {
- //not finished
-  };
+const handleToggleAvailability = () => {
+  if (!user.token || !myResponder) return;
+
+  const nextAvailability = !myResponder.isAvailable;
+
+  fetch(`${BACKEND_URL}/firstResponders/availability`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: user.token, isAvailable: nextAvailability }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.result) {
+        setMyResponder({ ...myResponder, isAvailable: nextAvailability });
+      }
+    })
+    .catch((error) => console.error(error));
+};
+
 
   const handleAcceptAlert = (alertToAccept) => {
     fetch(`${BACKEND_URL}/alerts/${alertToAccept.id}/accept`, {
@@ -270,7 +286,6 @@ export default function ResponderMapScreen({ navigation }) {
       });
   };
 // waiting for FindHospitalScreen to adapt the same code
-
 
   /* ========================== DERIVED VALUES ============================ */
 
