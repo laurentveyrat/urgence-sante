@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import {
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -212,6 +213,9 @@ export default function CreateAccountScreen({ navigation }) {
         <Text style={styles.link}>Déjà un compte ? Se connecter</Text>
       </TouchableOpacity>
 
+      <Image source={require("../assets/urgence_sante.png")} style={styles.logo} />
+      <Text style={styles.logoText}>{"Urgence\nSanté"}</Text>
+
       <StatusBar style="auto" />
     </View>
   );
@@ -225,6 +229,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  logo: {
+    width: 130,
+    height: 130,
+    resizeMode: "contain",
+    marginTop: 24,
+  },
+  logoText: {
+    fontSize: 26,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 8,
   },
   title: {
     fontSize: 25,

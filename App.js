@@ -50,6 +50,10 @@ function HomeStackScreen() {
         name="HospitalsMapScreen"
         component={HospitalsMapScreen}
       />
+      <HomeStack.Screen
+        name="ResponderMapScreen"
+        component={ResponderMapScreen}
+      />
     </HomeStack.Navigator>
   );
 }
@@ -58,7 +62,7 @@ function HomeStackScreen() {
 
 const TAB_ICONS = {
   Accueil: "home-outline",
-  Formation: "map-outline",
+  Formation: "school-outline",
   Historique: "document-text-outline",
   Profil: "person-outline",
 };
@@ -71,8 +75,20 @@ function MainTabs() {
         tabBarActiveTintColor: "#000",
         tabBarInactiveTintColor: "#8e8e8e",
         tabBarIcon: ({ color, size }) => (
-          <Ionicons name={TAB_ICONS[route.name]} color={color} size={size} />
+          <Ionicons
+            name={TAB_ICONS[route.name]}
+            color={color}
+            size={size + 4}
+          />
         ),
+        tabBarLabelStyle: {
+          fontSize: 13,
+        },
+        tabBarStyle: {
+          height: 64,
+          paddingTop: 8,
+          paddingBottom: 8,
+        },
       })}
     >
       <Tab.Screen name="Accueil" component={HomeStackScreen} />
@@ -99,10 +115,6 @@ export default function App() {
             />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="MainTabs" component={MainTabs} />
-            <Stack.Screen
-              name="ResponderMapScreen"
-              component={ResponderMapScreen}
-            />
           </Stack.Navigator>
         </NavigationContainer>
       </PersistGate>
