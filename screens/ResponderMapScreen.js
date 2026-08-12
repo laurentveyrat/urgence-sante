@@ -5,6 +5,7 @@ import {
   Modal,
   Platform,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -322,6 +323,7 @@ const handleToggleAvailability = () => {
       .then((data) => {
         if (data.result) {
           setActiveAlert(alertToAccept);
+          setSelectedAlert(null);
           setPendingAlerts((pendingAlert) =>
             pendingAlert.filter((alert) => alert.id !== alertToAccept.id),
           );
@@ -349,6 +351,14 @@ const handleToggleAvailability = () => {
       .catch((error) => {
         console.error(error);
       });
+  };
+
+  // open Google Maps app
+  const handleStartNavigation = () => {
+    if (!activeAlert) return;
+
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${activeAlert.latitude},${activeAlert.longitude}&travelmode=driving`;
+    Linking.openURL(url);
   };
 
   /* ========================== DERIVED VALUES ============================ */
@@ -391,6 +401,46 @@ const handleToggleAvailability = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
+      <Modal
+        visible={selectedAlert !== null}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setSelectedAlert(null)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            {selectedAlert && (
+              <>
+                <Text style={styles.name}>
+                  {selectedAlert.requesterName || "Alerte"}
+                </Text>
+                {selectedAlert.requesterPhone && (
+                  <Text style={styles.certification}>
+                    {selectedAlert.requesterPhone}
+                  </Text>
+                )}
+                <TouchableOpacity
+                  onPress={() => handleAcceptAlert(selectedAlert)}
+                  style={styles.button}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.textButton}>Accepter l'alerte</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            <TouchableOpacity
+              onPress={() => setSelectedAlert(null)}
+              style={[styles.button, styles.buttonSecondary]}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.textButton, styles.textButtonSecondary]}>
+                Refuser
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <Modal
         visible={modalVisible}
         animationType="fade"
@@ -458,6 +508,51 @@ const handleToggleAvailability = () => {
 
       <Text style={styles.title}>{heading.title}</Text>
       <Text style={styles.subtitle}>{heading.subtitle}</Text>
+
+      {mode === "mission" && myResponder && (
+        <View style={styles.availabilityRow}>
+          <Text style={styles.availabilityLabel}>
+            {myResponder.isAvailable ? "Disponible" : "Indisponible"}
+          </Text>
+          <Switch
+            value={myResponder.isAvailable}
+            onValueChange={handleToggleAvailability}
+            trackColor={{ false: "#9b9b9b", true: "#1b1b1b" }}
+          />
+        </View>
+      )}
+
+      {activeAlert && (
+        <View style={styles.missionBanner}>
+          <Text style={styles.missionText}>
+            Mission en cours
+            {activeAlert.requesterName ? ` — ${activeAlert.requesterName}` : ""}
+          </Text>
+          <View style={styles.missionButtons}>
+            <TouchableOpacity
+              onPress={handleStartNavigation}
+              style={styles.missionButton}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.missionButtonText}>Y aller</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleCloseAlert}
+              style={[styles.missionButton, styles.missionButtonSecondary]}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.missionButtonText,
+                  styles.missionButtonTextSecondary,
+                ]}
+              >
+                Terminer
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       <View style={styles.mapContainer}>
         <MapView
@@ -569,6 +664,57 @@ const styles = StyleSheet.create({
     color: "#1b1b1b",
     paddingHorizontal: 20,
     marginBottom: 12,
+  },
+  availabilityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  availabilityLabel: {
+    fontSize: 17,
+    fontWeight: "bold",
+    color: "#1b1b1b",
+  },
+  missionBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1b1b1b",
+    marginHorizontal: 20,
+    marginBottom: 12,
+    padding: 14,
+    borderRadius: 12,
+  },
+  missionText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#ffffff",
+  },
+  missionButtons: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  missionButton: {
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  missionButtonText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#1b1b1b",
+  },
+  missionButtonSecondary: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#ffffff",
+  },
+  missionButtonTextSecondary: {
+    color: "#ffffff",
   },
   mapContainer: {
     flex: 1,
