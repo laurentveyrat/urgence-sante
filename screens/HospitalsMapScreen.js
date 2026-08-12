@@ -12,53 +12,8 @@ import { Ionicons } from "@expo/vector-icons";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 
-// -------------------------- MOCK DATA -------------------------
-const MOCK_HOSPITALS = [
-  {
-    id: "hop-1",
-    name: "Hôpital Necker - Enfants Malades",
-    latitude: 48.8449,
-    longitude: 2.314,
-    specialties: ["Pédiatrie", "Gastro-entérologie"],
-  },
-  {
-    id: "hop-2",
-    name: "Hôpital Lariboisière",
-    latitude: 48.8823,
-    longitude: 2.3499,
-    specialties: ["Urgences générales", "Pédiatrie"],
-  },
-  {
-    id: "hop-3",
-    name: "Hôpital Armand Trousseau",
-    latitude: 48.8398,
-    longitude: 2.4014,
-    specialties: ["Pédiatrie spécialisée"],
-  },
-  {
-    id: "hop-4",
-    name: "Hôpital Robert Debré",
-    latitude: 48.8785,
-    longitude: 2.4013,
-    specialties: ["Pédiatrie", "Urgences pédiatriques"],
-  },
-  {
-    id: "hop-5",
-    name: "Hôpital Cochin",
-    latitude: 48.8365,
-    longitude: 2.3378,
-    specialties: ["Urgences générales", "Gynécologie"],
-  },
-  {
-    id: "hop-6",
-    name: "Hôpital Saint-Louis",
-    latitude: 48.8722,
-    longitude: 2.3701,
-    specialties: ["Urgences générales", "Hématologie"],
-  },
-];
-
 // -------------------------- VARIABLES / CONSTANTES / UTILITAIRES -------------------------
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_ADRESS;
 const randomWaitMinutes = () => Math.floor(Math.random() * (120 - 15 + 1)) + 15;
 
 const PARIS_CENTER = { latitude: 48.8566, longitude: 2.3522 };
@@ -176,12 +131,7 @@ export default function HospitalsMapScreen({ navigation, route }) {
     route.params ?? {};
 
   // -------------------------- STATES -------------------------
-  const [hospitals] = useState(() =>
-    MOCK_HOSPITALS.map((hospital) => ({
-      ...hospital,
-      waitMinutes: randomWaitMinutes(),
-    })),
-  );
+  const [hospitals, setHospitals] = useState([]);
   const [selectedId, setSelectedId] = useState(hospitals[0]?.id ?? null);
   const [currentPosition, setCurrentPosition] = useState(null);
   const mapRef = useRef(null);
@@ -259,6 +209,36 @@ export default function HospitalsMapScreen({ navigation, route }) {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${hospital.latitude},${hospital.longitude}&travelmode=driving`;
     Linking.openURL(url);
   };
+
+  /* ------------------------ fetch hospitals from backend ----------------------- */
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/hospitals`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.result) return;
+
+        const fetchedHospitals = data.hospitals.map((hospital) => ({
+          ...hospital,
+          waitMinutes: randomWaitMinutes(),
+        }));
+
+        setHospitals(fetchedHospitals);
+
+        const first = fetchedHospitals[0];
+        if (first) {
+          setSelectedId(first.id);
+          setRegion({
+            latitude: first.latitude,
+            longitude: first.longitude,
+            latitudeDelta: 0.08,
+            longitudeDelta: 0.08,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
 
   /* ------------------------ to locate currentPosition ----------------------- */
   useEffect(() => {
@@ -396,7 +376,9 @@ export default function HospitalsMapScreen({ navigation, route }) {
             setListLayoutHeight(event.nativeEvent.layout.height)
           }
           onContentSizeChange={(width, height) => setListContentHeight(height)}
-          onScroll={(event) => setListScrollY(event.nativeEvent.contentOffset.y)}
+          onScroll={(event) =>
+            setListScrollY(event.nativeEvent.contentOffset.y)
+          }
           scrollEventThrottle={16}
         >
           {hospitalsWithDistance.map((hospital) => {
