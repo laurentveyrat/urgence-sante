@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import * as ImagePicker from 'expo-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateSocialSecurityNumber } from '../reducers/user';
+import { logout, updateSocialSecurityNumber } from '../reducers/user';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_ADRESS;
 
@@ -212,6 +212,35 @@ useEffect(() => {
     setPostalCodeError(validatePostalCode(value));
     clearSaveMessages();
   };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigation.getParent().reset({ routes: [{ name: "Login" }] });
+// clear the profile after logout(another method)
+    // setPhoto(null);
+    // setPhotoError('');
+    // setFirstname('');
+    // setLastname('');
+    // setBirthdate('');
+    // setStreet('');
+    // setPostalCode('');
+    // setCity('');
+    // setCountry('');
+    // setNss('');
+    // setBirthdateError('');
+    // setBirthdateTouched(false);
+    // setPostalCodeError('');
+    // setPostalCodeTouched(false);
+    // setNssError('');
+    // setNssTouched(false);
+    // setIsSaving(false);
+    // setIsEditing(true);
+    // clearSaveMessages();
+
+    // navigation.navigate('Login');
+    
+  };
+
 
   const handleSave = () => {
     const nssErrorOnSave = validateNss(nss);
@@ -448,6 +477,13 @@ useEffect(() => {
               <Text style={styles.saveButtonText}>Modifier</Text>
             </TouchableOpacity>
           )}
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.logoutButtonText}>Se déconnecter</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -569,9 +605,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 24,
   },
+  logoutButton: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#1b1b1b',
+    paddingVertical: 18,
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 24,
+  },
   saveButtonText: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  logoutButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1b1b1b',
   },
 });
