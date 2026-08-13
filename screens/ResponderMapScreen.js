@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  Image,
   Keyboard,
   Linking,
   Modal,
@@ -451,21 +452,38 @@ const handleToggleAvailability = () => {
           <View style={styles.modalView}>
             {selectedFirstResponder && (
               <>
+                <View style={styles.avatarContainer}>
+                  {selectedFirstResponder.photo ? (
+                    <Image
+                      source={{ uri: selectedFirstResponder.photo }}
+                      style={styles.avatarImage}
+                    />
+                  ) : (
+                    <FontAwesome5
+                      name="user-circle"
+                      size={72}
+                      color="#1b1b1b"
+                      solid
+                    />
+                  )}
+                </View>
                 <Text style={styles.name}>{selectedFirstResponder.name}</Text>
                 <Text style={styles.certification}>
                   {selectedFirstResponder.certification}
                 </Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    Linking.openURL(`tel:${selectedFirstResponder.phone}`)
-                  }
-                  style={styles.button}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.textButton}>
-                    Appeler {selectedFirstResponder.phone}
-                  </Text>
-                </TouchableOpacity>
+                {selectedFirstResponder.phone ? (
+                  <TouchableOpacity
+                    onPress={() =>
+                      Linking.openURL(`tel:${selectedFirstResponder.phone}`)
+                    }
+                    style={styles.button}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.textButton}>
+                      Appeler {selectedFirstResponder.phone}
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
               </>
             )}
             {user.token && (
@@ -810,6 +828,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  avatarContainer: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  avatarImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
   },
   name: {
     fontSize: 18,
