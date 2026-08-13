@@ -235,13 +235,13 @@ const styles = StyleSheet.create({
     width: 130,
     height: 130,
     resizeMode: "contain",
-    marginTop: 24,
+    marginTop: 64,
   },
   logoText: {
     fontSize: 26,
     fontWeight: "bold",
     textAlign: "center",
-    marginTop: 8,
+    marginTop: 0,
   },
   title: {
     fontSize: 25,
