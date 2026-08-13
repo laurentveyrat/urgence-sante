@@ -14,14 +14,16 @@ export default function EmergencyScreen({ navigation }) {
           <FontAwesome5 name="chevron-left" size={18} color="#ffffff" />
         </TouchableOpacity>
       </View>
-      <Text style={styles.title}>Urgence Absolue</Text>
+      <Text style={styles.title}>Urgence Absolue :</Text>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate('ResponderMapScreen')}
           activeOpacity={0.8}
           >
-          <Text style={styles.buttonText}>Secouriste de Proximité</Text>
+          <Text style={styles.buttonText}>
+            {user.isFirstResponder ? "Alertes à Proximité" : "Secouriste de Proximité"}
+          </Text>  
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
