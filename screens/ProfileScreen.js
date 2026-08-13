@@ -195,6 +195,33 @@ useEffect(() => {
       });
   };
 
+  const handleRemovePhoto = () => {
+    setPhotoError('');
+    clearSaveMessages();
+
+    if (!user.token) {
+      setPhoto(null);
+      return;
+    }
+
+    fetch(`${BACKEND_URL}/users/profile/photo`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: user.token }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          setPhoto(null);
+        } else {
+          setPhotoError(data.error || "La photo n'a pas pu être supprimée");
+        }
+      })
+      .catch(() => {
+        setPhotoError('Impossible de contacter le serveur');
+      });
+  };
+
   const handleChangeNss = (value) => {
     setNss(value);
     setNssError(validateNss(value));
@@ -328,11 +355,22 @@ useEffect(() => {
             onPress={handleAddPhoto}
             activeOpacity={0.8}
           >
-            {photo ? (
-              <Image source={{ uri: photo }} style={styles.avatarImage} />
-            ) : (
-              <FontAwesome5 name="user-circle" size={160} color="#1b1b1b" solid />
-            )}
+            <View style={styles.avatarWrapper}>
+              {photo ? (
+                <Image source={{ uri: photo }} style={styles.avatarImage} />
+              ) : (
+                <FontAwesome5 name="user-circle" size={160} color="#1b1b1b" solid />
+              )}
+              {isEditing && photo ? (
+                <TouchableOpacity
+                  style={styles.removePhotoButton}
+                  onPress={handleRemovePhoto}
+                  activeOpacity={0.8}
+                >
+                  <FontAwesome5 name="times" size={16} color="#ffffff" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
             <Text style={styles.avatarHint}>Appuyer pour changer la photo</Text>
           </TouchableOpacity>
           {photoError ? (
@@ -523,10 +561,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
   },
+  avatarWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   avatarImage: {
     width: 160,
     height: 160,
     borderRadius: 80,
+  },
+  removePhotoButton: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#d00000',
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarHint: {
     fontSize: 15,
