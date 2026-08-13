@@ -1,8 +1,11 @@
 import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useSelector } from 'react-redux';
 
 export default function EmergencyScreen({ navigation }) {
+  const user = useSelector((state) => state.user.value);
+
   return (
  <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -14,22 +17,24 @@ export default function EmergencyScreen({ navigation }) {
           <FontAwesome5 name="chevron-left" size={18} color="#ffffff" />
         </TouchableOpacity>
       </View>
-      <Text style={styles.title}>Urgence Absolue</Text>
+      <Text style={styles.title}>Urgence Absolue :</Text>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate('ResponderMapScreen')}
           activeOpacity={0.8}
-          >
-          <Text style={styles.buttonText}>Secouriste de Proximité</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => Linking.openURL('tel:15')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.buttonText}>Appel SAMU</Text>
-          </TouchableOpacity>
+        >
+          <Text style={styles.buttonText}>
+            {user.isFirstResponder ? "Alertes à Proximité" : "Secouriste de Proximité"}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => Linking.openURL('tel:15')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>Appel SAMU</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
