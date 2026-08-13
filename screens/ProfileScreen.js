@@ -343,7 +343,8 @@ useEffect(() => {
             <View style={styles.field}>
               <Text style={styles.label}>Prénom :</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, !isEditing && styles.inputLocked]}
+                editable={isEditing}
                 value={firstname}
                 onChangeText={(value) => {
                   setFirstname(value);
@@ -356,7 +357,8 @@ useEffect(() => {
             <View style={styles.field}>
               <Text style={styles.label}>Nom :</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, !isEditing && styles.inputLocked]}
+                editable={isEditing}
                 value={lastname}
                 onChangeText={(value) => {
                   setLastname(value);
@@ -371,7 +373,8 @@ useEffect(() => {
           <View style={styles.row}>
             <Text style={styles.label}>Date de Naissance :</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, !isEditing && styles.inputLocked]}
+              editable={isEditing}
               value={birthdate}
               onChangeText={handleChangeBirthdate}
               onBlur={() => setBirthdateTouched(true)}
@@ -386,7 +389,8 @@ useEffect(() => {
           <View style={styles.row}>
             <Text style={styles.label}>Adresse :</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, !isEditing && styles.inputLocked]}
+              editable={isEditing}
               value={street}
               onChangeText={(value) => {
                 setStreet(value);
@@ -399,7 +403,8 @@ useEffect(() => {
               <View style={styles.postalCodeField}>
                 <Text style={styles.subLabel}>Code postal :</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, !isEditing && styles.inputLocked]}
+                  editable={isEditing}
                   value={postalCode}
                   onChangeText={handleChangePostalCode}
                   onBlur={() => setPostalCodeTouched(true)}
@@ -412,7 +417,8 @@ useEffect(() => {
               <View style={styles.field}>
                 <Text style={styles.subLabel}>Ville :</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, !isEditing && styles.inputLocked]}
+                  editable={isEditing}
                   value={city}
                   onChangeText={(value) => {
                     setCity(value);
@@ -428,7 +434,8 @@ useEffect(() => {
             ) : null}
             <Text style={styles.subLabel}>Pays :</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, !isEditing && styles.inputLocked]}
+              editable={isEditing}
               value={country}
               onChangeText={(value) => {
                 setCountry(value);
@@ -441,7 +448,8 @@ useEffect(() => {
           <View style={styles.row}>
             <Text style={styles.label}>N° Sécurité Sociale :</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, !isEditing && styles.inputLocked]}
+              editable={isEditing}
               value={nss}
               onChangeText={handleChangeNss}
               onBlur={() => setNssTouched(true)}
@@ -555,6 +563,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
+  },
+  inputLocked: {
+    color: '#9b9b9b',
   },
   subLabel: {
     fontSize: 15,
