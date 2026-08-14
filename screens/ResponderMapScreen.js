@@ -461,7 +461,7 @@ const handleToggleAvailability = () => {
                   ) : (
                     <FontAwesome5
                       name="user-circle"
-                      size={72}
+                      size={120}
                       color="#1b1b1b"
                       solid
                     />
@@ -831,12 +831,12 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 14,
   },
   avatarImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   name: {
     fontSize: 18,
