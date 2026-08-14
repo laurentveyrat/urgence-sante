@@ -68,7 +68,7 @@ export default function ResponderMapScreen({ navigation }) {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [selectedFirstResponder, setSelectedFirstResponder] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [alertSent, setAlertSent] = useState(false);
+  const [alertSentTo, setAlertSentTo] = useState(null);
   const [search, setSearch] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [myResponder, setMyResponder] = useState(null);
@@ -238,12 +238,13 @@ export default function ResponderMapScreen({ navigation }) {
         token: user.token,
         latitude: currentPosition.latitude,
         longitude: currentPosition.longitude,
+        firstResponderId: selectedFirstResponder.id,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.result) {
-          setAlertSent(true);
+          setAlertSentTo(selectedFirstResponder.id);
         } else {
           alert(
             data.error ||
@@ -494,13 +495,19 @@ const handleToggleAvailability = () => {
                 onPress={() => handleAlert()}
                 style={[
                   styles.button,
-                  (!currentPosition || alertSent) && styles.buttonDisabled,
+                  (!currentPosition ||
+                    alertSentTo === selectedFirstResponder?.id) &&
+                    styles.buttonDisabled,
                 ]}
                 activeOpacity={0.8}
-                disabled={!currentPosition || alertSent}
+                disabled={
+                  !currentPosition || alertSentTo === selectedFirstResponder?.id
+                }
               >
                 <Text style={styles.textButton}>
-                  {alertSent ? "Alerte envoyée" : "Envoyer une alerte"}
+                  {alertSentTo === selectedFirstResponder?.id
+                    ? "Alerte envoyée"
+                    : "Envoyer une alerte"}
                 </Text>
               </TouchableOpacity>
             )}
