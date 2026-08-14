@@ -53,11 +53,14 @@ export default function TrainingScreen({ navigation }) {
         key={formation.id}
         style={styles.formation}
         onPress={() => handlePress(formation.url)}
-        disabled={!formation.url}
-        activeOpacity={0.8}
+        activeOpacity={0.7}
       >
         <Text style={styles.formationTitle}>{formation.title}</Text>
         <Text style={styles.formationDescription}>{formation.description}</Text>
+        <View style={styles.seeMoreButton}>
+          <Text style={styles.seeMoreText}>En savoir plus</Text>
+          <FontAwesome5 name="chevron-right" size={13} color="#7A0C25" />
+        </View>
       </TouchableOpacity>
     );
   });
@@ -113,6 +116,16 @@ const styles = StyleSheet.create({
   },
   formation: {
     marginBottom: 22,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   formationTitle: {
     fontSize: 18,
@@ -128,13 +141,13 @@ const styles = StyleSheet.create({
   seeMoreButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     gap: 8,
-    paddingVertical: 12,
+    paddingTop: 12,
   },
   seeMoreText: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
-    color: '#1b1b1b',
+    color: '#7A0C25',
   },
 });
