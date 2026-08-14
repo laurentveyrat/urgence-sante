@@ -373,6 +373,9 @@ const handleToggleAvailability = () => {
           longitude: firstResponder.longitude,
         }}
         title={firstResponder.name}
+        pinColor={
+          selectedFirstResponder?.id === firstResponder.id ? "#7A0C25" : "#000"
+        }
         onPress={() => handlePress(firstResponder)}
       />
     );
@@ -387,7 +390,7 @@ const handleToggleAvailability = () => {
           longitude: pendingAlert.longitude,
         }}
         title={pendingAlert.requesterName || "Alerte"}
-        pinColor="red"
+        pinColor={selectedAlert?.id === pendingAlert.id ? "#7A0C25" : "#000"}
         onPress={() => setSelectedAlert(pendingAlert)}
       />
     );
