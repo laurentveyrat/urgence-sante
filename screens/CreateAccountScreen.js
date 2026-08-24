@@ -12,50 +12,14 @@ import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import { login } from "../reducers/user";
 
-// --------------------- VALIDATION ------------------
-function validateNumeroSecu(value) {
-  if (!value) return ""; // optionnel
+// --------------- IMPORT FUNCTIONS INPUTS VALIDATION -------------
+import {
+  validateNumeroSecu,
+  validateEmail,
+  validatePassword,
+} from "../utils/validators";
 
-  const match = /^(\d)(\d{2})(\d{2})(\d{2})(\d{3})(\d{3})$/.exec(value);
-  if (!match) {
-    return "Le numéro de sécurité sociale doit contenir 13 chiffres";
-  }
-  const [, sexe, , mois, departement] = match;
-
-  if (sexe !== "1" && sexe !== "2") {
-    return "1er chiffre invalide : sexe attendu (1 homme, 2 femme)";
-  }
-
-  const moisNum = Number(mois);
-  if (moisNum < 1 || moisNum > 12) {
-    return "Chiffres 4-5 invalides : mois de naissance attendu (01-12)";
-  }
-
-  const departementNum = Number(departement);
-  if (departementNum < 1 || (departementNum > 95 && departementNum !== 99)) {
-    return "Chiffres 6-7 invalides : département de naissance attendu";
-  }
-
-  return "";
-}
-
-function validateEmail(value) {
-  if (!value) return "L'email est requis";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-    return "L'email n'est pas valide";
-  }
-  return "";
-}
-
-function validatePassword(value) {
-  if (!value) return "Le mot de passe est requis";
-  if (value.length < 8) return "8 caractères minimum";
-  if (!/[A-Z]/.test(value)) return "Au moins une majuscule";
-  if (!/[a-z]/.test(value)) return "Au moins une minuscule";
-  if (!/[^A-Za-z0-9]/.test(value)) return "Au moins un caractère spécial";
-  return "";
-}
-
+// --------------------- COMPONENT ------------------
 export default function CreateAccountScreen({ navigation }) {
   const dispatch = useDispatch();
   // --------------------- STATES ------------------
@@ -126,11 +90,14 @@ export default function CreateAccountScreen({ navigation }) {
       const data = await response.json();
 
       if (data.result) {
-        dispatch(login({
-          email: data.email,
-          token: data.token,
-          socialSecurityNumber: data.socialSecurityNumber,
-          isFirstResponder: data.isFirstResponder, }));
+        dispatch(
+          login({
+            email: data.email,
+            token: data.token,
+            socialSecurityNumber: data.socialSecurityNumber,
+            isFirstResponder: data.isFirstResponder,
+          }),
+        );
         navigation.navigate("MainTabs");
       } else {
         setSubmitError(data.error || "Une erreur est survenue");
@@ -213,7 +180,10 @@ export default function CreateAccountScreen({ navigation }) {
         <Text style={styles.link}>Déjà un compte ? Se connecter</Text>
       </TouchableOpacity>
 
-      <Image source={require("../assets/urgence_sante.png")} style={styles.logo} />
+      <Image
+        source={require("../assets/urgence_sante.png")}
+        style={styles.logo}
+      />
       <Text style={styles.logoText}>{"Urgence\nSanté"}</Text>
 
       <StatusBar style="auto" />

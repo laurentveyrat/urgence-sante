@@ -11,14 +11,8 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { login } from "../reducers/user";
 
-// --------------------- VALIDATION ------------------
-function validateEmail(value) {
-  if (!value) return "L'email est requis";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-    return "L'email n'est pas valide";
-  }
-  return "";
-}
+// --------------------- INPUTS VALIDATION ------------------
+import { validateEmail } from "../utils/validators";
 
 function validatePassword(value) {
   if (!value) return "Le mot de passe est requis";
@@ -74,7 +68,14 @@ export default function LoginScreen({ navigation }) {
       const data = await response.json();
 
       if (data.result) {
-        dispatch(login({ email: data.email, token: data.token, socialSecurityNumber: data.socialSecurityNumber, isFirstResponder: data.isFirstResponder, }));
+        dispatch(
+          login({
+            email: data.email,
+            token: data.token,
+            socialSecurityNumber: data.socialSecurityNumber,
+            isFirstResponder: data.isFirstResponder,
+          }),
+        );
         navigation.navigate("MainTabs");
       } else {
         setSubmitError(data.error || "Une erreur est survenue");
@@ -132,7 +133,10 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.link}>Pas encore de compte ? Créer un compte</Text>
       </TouchableOpacity>
 
-      <Image source={require("../assets/urgence_sante.png")} style={styles.logo} />
+      <Image
+        source={require("../assets/urgence_sante.png")}
+        style={styles.logo}
+      />
       <Text style={styles.logoText}>{"Urgence\nSanté"}</Text>
 
       <StatusBar style="auto" />
