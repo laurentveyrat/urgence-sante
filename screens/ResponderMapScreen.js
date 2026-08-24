@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  Image,
   Keyboard,
   Linking,
   Modal,
@@ -67,7 +68,7 @@ export default function ResponderMapScreen({ navigation }) {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [selectedFirstResponder, setSelectedFirstResponder] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [alertSent, setAlertSent] = useState(false);
+  const [alertSentTo, setAlertSentTo] = useState(null);
   const [search, setSearch] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [myResponder, setMyResponder] = useState(null);
@@ -237,12 +238,13 @@ export default function ResponderMapScreen({ navigation }) {
         token: user.token,
         latitude: currentPosition.latitude,
         longitude: currentPosition.longitude,
+        firstResponderId: selectedFirstResponder.id,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.result) {
-          setAlertSent(true);
+          setAlertSentTo(selectedFirstResponder.id);
         } else {
           alert(
             data.error ||
@@ -372,6 +374,9 @@ const handleToggleAvailability = () => {
           longitude: firstResponder.longitude,
         }}
         title={firstResponder.name}
+        pinColor={
+          selectedFirstResponder?.id === firstResponder.id ? "#7A0C25" : "#000"
+        }
         onPress={() => handlePress(firstResponder)}
       />
     );
@@ -386,7 +391,7 @@ const handleToggleAvailability = () => {
           longitude: pendingAlert.longitude,
         }}
         title={pendingAlert.requesterName || "Alerte"}
-        pinColor="red"
+        pinColor={selectedAlert?.id === pendingAlert.id ? "#7A0C25" : "#000"}
         onPress={() => setSelectedAlert(pendingAlert)}
       />
     );
@@ -451,21 +456,38 @@ const handleToggleAvailability = () => {
           <View style={styles.modalView}>
             {selectedFirstResponder && (
               <>
+                <View style={styles.avatarContainer}>
+                  {selectedFirstResponder.photo ? (
+                    <Image
+                      source={{ uri: selectedFirstResponder.photo }}
+                      style={styles.avatarImage}
+                    />
+                  ) : (
+                    <FontAwesome5
+                      name="user-circle"
+                      size={120}
+                      color="#1b1b1b"
+                      solid
+                    />
+                  )}
+                </View>
                 <Text style={styles.name}>{selectedFirstResponder.name}</Text>
                 <Text style={styles.certification}>
                   {selectedFirstResponder.certification}
                 </Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    Linking.openURL(`tel:${selectedFirstResponder.phone}`)
-                  }
-                  style={styles.button}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.textButton}>
-                    Appeler {selectedFirstResponder.phone}
-                  </Text>
-                </TouchableOpacity>
+                {selectedFirstResponder.phone ? (
+                  <TouchableOpacity
+                    onPress={() =>
+                      Linking.openURL(`tel:${selectedFirstResponder.phone}`)
+                    }
+                    style={styles.button}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.textButton}>
+                      Appeler {selectedFirstResponder.phone}
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
               </>
             )}
             {user.token && (
@@ -473,13 +495,19 @@ const handleToggleAvailability = () => {
                 onPress={() => handleAlert()}
                 style={[
                   styles.button,
-                  (!currentPosition || alertSent) && styles.buttonDisabled,
+                  (!currentPosition ||
+                    alertSentTo === selectedFirstResponder?.id) &&
+                    styles.buttonDisabled,
                 ]}
                 activeOpacity={0.8}
-                disabled={!currentPosition || alertSent}
+                disabled={
+                  !currentPosition || alertSentTo === selectedFirstResponder?.id
+                }
               >
                 <Text style={styles.textButton}>
-                  {alertSent ? "Alerte envoyée" : "Envoyer une alerte"}
+                  {alertSentTo === selectedFirstResponder?.id
+                    ? "Alerte envoyée"
+                    : "Envoyer une alerte"}
                 </Text>
               </TouchableOpacity>
             )}
@@ -810,6 +838,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  avatarContainer: {
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   name: {
     fontSize: 18,
